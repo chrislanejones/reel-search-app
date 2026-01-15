@@ -1,38 +1,81 @@
-# sv
+# Movies Explorer
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A movie search application built with **SvelteKit** that allows users to search, filter, and browse movies using a public REST API.
 
-## Creating a project
+The app supports paginated results, genre filtering, and displays key movie details such as title, summary, rating, runtime, and poster.
 
-If you're seeing this, you've probably already done this step. Congrats!
 
-```sh
-# create a new project in the current directory
-npx sv create
+## ✨ Features
 
-# create a new project in my-app
-npx sv create my-app
+- Search movies by title
+- Filter results by genre
+- Paginated results with next/previous navigation
+- Total result count display
+- Clear empty and loading states
+- URL-driven state (search, page, genre)
+
+
+## 🥱 Technical Highlights
+
+### API Client Normalization
+
+One of the most significant aspects of this project is the API client layer.
+
+Although the REST API documentation suggested a certain response structure, the actual API returned a different shape. To keep the UI stable and predictable, I implemented a normalization layer in the API client that adapts the backend response into a consistent, UI‑focused model.
+
+One benefit of this approach is that it keeps components simple and isolates backend inconsistencies to a single place.
+
+
+### Auth-Aware Data Fetching
+
+The Movies API requires authenticated requests using a short‑lived token. The application fetches a token on demand and includes it in all movie requests, ensuring compatibility with the API while keeping the authentication logic encapsulated in the data layer.
+
+
+### URL-Based State Management
+
+Search terms, pagination, and filters are all driven by URL cuery parameters. This allows:
+
+- Shareable URLs
+- Back/forward browser navigation
+- Easier debugging and testing
+
+
+## � Ech Stack
+- **SvelteKit**
+- **TypeScript**
+ - **Tailwind CSS**
+- Native Fetch API
+- Vite
+
+
+
+## 🚀 Running Locally
+
+``b
+nms install
+nam run dev
 ```
 
-## Developing
+Then open:
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```
+http://localhost:5173
 ```
 
-## Building
 
-To create a production version of your app:
+## ✅ What I'm Most Proud Of
 
-```sh
-npm run build
-```
+I'm most proud of how the API integration was handled. The final implementation reflects real‑world conditions: undocumented API behavior, authentication requirements, and SSR considerations. The resulting data layer is resilient, testable, and easy to reason about.
 
-You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### 🔧 What I'd Add With More Time
+
+- Accessibility improvements (keyboard navigation, ARIA labels)
+- Unit tests for the API client
+- Improved pagination controls (jump to page)
+- Movie detail view using /movies/{id}
+
+
+## 📄 Notes
+
+This project was built as a take‑home exercise and focuses on clean architecture and functionality rather than visual design polish.

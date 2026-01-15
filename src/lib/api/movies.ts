@@ -52,21 +52,16 @@ type FetchMoviesParams = {
 	genre?: string;
 };
 
-let authToken: string | null = null;
-
 async function getAuthToken(fetchFn: Fetch): Promise<string> {
-	if (authToken) return authToken;
-
 	const response = await fetchFn(`${BASE_URL}/auth/token`);
 
 	if (!response.ok) {
-		throw new Error('Failed to fetch auth token');
+		const text = await response.text();
+		throw new Error(`Failed to fetch auth token: ${text}`);
 	}
 
 	const data: { token: string } = await response.json();
-
-	authToken = data.token;
-	return authToken;
+	return data.token;
 }
 
 export async function fetchMovies(
@@ -75,8 +70,9 @@ export async function fetchMovies(
 ): Promise<MoviesResponse> {
 	const params = new URLSearchParams();
 
-	if (query) params.set('search', query);
+	params.set('search', query);
 	params.set('page', String(page));
+	params.set('limit', '25');
 	if (genre) params.set('genre', genre);
 
 	const token = await getAuthToken(fetchFn);
@@ -92,12 +88,15 @@ export async function fetchMovies(
 		throw new Error(`Failed to fetch movies (${response.status}): ${text}`);
 	}
 
-	const data = await response.json();
+	const data: {
+		data: ApiMovie[];
+		totalPages: number;
+	} = await response.json();
 
 	return {
-		results: data.results.map(mapMovie),
-		total: data.total,
-		page: data.page,
+		results: data.data.map(mapMovie),
+		total: data.data.length,
+		page,
 		totalPages: data.totalPages
 	};
 }
@@ -117,17 +116,4 @@ function mapMovie(apiMovie: ApiMovie): Movie {
 			.map((g) => (typeof g === 'string' ? g : g?.name))
 			.filter(Boolean) as string[]
 	};
-}
-
-/* ----------------------------------
- * Step 5: (Optional) Genres
- * ---------------------------------- */
-export async function fetchGenres(fetchFn: Fetch): Promise<string[]> {
-	const response = await fetchFn(`${BASE_URL}/genres`);
-
-	if (!response.ok) {
-		throw new Error('Failed to fetch genres');
-	}
-
-	return response.json();
 }

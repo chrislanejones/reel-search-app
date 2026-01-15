@@ -1,6 +1,8 @@
 import { fetchMovies } from '$lib/api/movies';
 import type { PageLoad } from './$types';
 
+export const ssr = false;
+
 export const load: PageLoad = async ({ fetch, url }) => {
 	const query = url.searchParams.get('query');
 	const page = Number(url.searchParams.get('page') ?? 1);

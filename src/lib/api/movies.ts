@@ -52,20 +52,44 @@ type FetchMoviesParams = {
 	genre?: string;
 };
 
+let authToken: string | null = null;
+
+async function getAuthToken(fetchFn: Fetch): Promise<string> {
+	if (authToken) return authToken;
+
+	const response = await fetchFn(`${BASE_URL}/auth/token`);
+
+	if (!response.ok) {
+		throw new Error('Failed to fetch auth token');
+	}
+
+	const data: { token: string } = await response.json();
+
+	authToken = data.token;
+	return authToken;
+}
+
 export async function fetchMovies(
 	fetchFn: Fetch,
 	{ query, page, genre }: FetchMoviesParams
 ): Promise<MoviesResponse> {
 	const params = new URLSearchParams();
 
-	if (query) params.set('query', query);
+	if (query) params.set('search', query);
 	params.set('page', String(page));
 	if (genre) params.set('genre', genre);
 
-	const response = await fetchFn(`${BASE_URL}/movies?${params.toString()}`);
+	const token = await getAuthToken(fetchFn);
+
+	const response = await fetchFn(`${BASE_URL}/movies?${params.toString()}`, {
+		headers: {
+			Authorization: `Bearer ${token}`
+		}
+	});
 
 	if (!response.ok) {
-		throw new Error('Failed to fetch movies');
+		const text = await response.text();
+		throw new Error(`Failed to fetch movies (${response.status}): ${text}`);
 	}
 
 	const data = await response.json();

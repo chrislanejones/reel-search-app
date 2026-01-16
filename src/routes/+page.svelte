@@ -1,23 +1,22 @@
 <script lang="ts">
-	export let data: {
-		results: any[];
-		total: number;
-		page: number;
-		totalPages: number;
-	};
+	import SearchBar from '$lib/components/SearchBar.svelte';
+	export let data;
 </script>
 
-<h1>Movie Search</h1>
+<h1 class="mb-4 text-2xl font-bold">Movie Search</h1>
+
+<SearchBar />
 
 {#if data.results.length === 0}
-	<p>Search for a movie to begin.</p>
+	<p class="mt-6">Search for a movie to begin.</p>
 {:else}
-	<p>Total results: {data.total}</p>
-
-	<ul>
+	<ul class="mt-6 space-y-4">
 		{#each data.results as movie}
-			<li>
-				<strong>{movie.title}</strong>
+			<li class="rounded border p-4">
+				<h2 class="font-semibold">{movie.title}</h2>
+				<p class="mt-2 text-sm text-gray-600">
+					{movie.summary}
+				</p>
 			</li>
 		{/each}
 	</ul>

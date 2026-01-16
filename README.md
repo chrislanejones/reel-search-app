@@ -4,7 +4,6 @@ A movie search application built with **SvelteKit** that allows users to search,
 
 The app supports paginated results, genre filtering, and displays key movie details such as title, summary, rating, runtime, and poster.
 
-
 ## ✨ Features
 
 - Search movies by title
@@ -13,7 +12,6 @@ The app supports paginated results, genre filtering, and displays key movie deta
 - Total result count display
 - Clear empty and loading states
 - URL-driven state (search, page, genre)
-
 
 ## 🥱 Technical Highlights
 
@@ -25,41 +23,39 @@ Although the REST API documentation suggested a certain response structure, the 
 
 One benefit of this approach is that it keeps components simple and isolates backend inconsistencies to a single place.
 
-
 ### Auth-Aware Data Fetching
 
 The Movies API requires authenticated requests using a short‑lived token. The application fetches a token on demand and includes it in all movie requests, ensuring compatibility with the API while keeping the authentication logic encapsulated in the data layer.
 
-
 ### URL-Based State Management
 
-Search terms, pagination, and filters are all driven by URL cuery parameters. This allows:
+Search terms, pagination, and filters are all driven by URL query parameters. This allows:
 
 - Shareable URLs
 - Back/forward browser navigation
 - Easier debugging and testing
 
+## 🛠 Tech Stack
 
-## � Ech Stack
 - **SvelteKit**
 - **TypeScript**
- - **Tailwind CSS**
+- **Tailwind CSS**
 - Native Fetch API
 - Vite
 
-
-
 ## 🚀 Running Locally
 
-``b
-nms install
-nam run dev
+```bash
+npm install
+npm run dev
 ```
 
 Then open:
 
 ```
+
 http://localhost:5173
+
 ```
 
 

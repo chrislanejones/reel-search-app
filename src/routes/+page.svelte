@@ -12,11 +12,13 @@
 
 {#if $page.status === 'loading'}
 	<p class="mt-6 text-gray-600">Loading results…</p>
+{:else if !$page.url.searchParams.get('query')}
+	<p class="mt-6 text-gray-600">Search for a movie to begin.</p>
 {:else if data.results.length === 0}
 	<p class="mt-6 text-gray-600">No results found. Try a different search.</p>
 {:else}
 	<p class="mt-4 text-sm text-gray-600">
-		Page {data.page} of {data.totalPages} — showing {data.results.length} results
+		Total results: {data.total} — Page {data.page} of {data.totalPages}
 	</p>
 
 	<ul class="mt-4 space-y-4">

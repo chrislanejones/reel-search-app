@@ -20,7 +20,10 @@
 		if (!value.trim()) {
 			goto('/');
 		} else {
-			goto(`/?query=${encodeURIComponent(value)}&page=1`);
+			const params = new URLSearchParams($page.url.searchParams);
+			params.set('query', query);
+			params.set('page', '1');
+			goto(`/?${params.toString()}`);
 		}
 	}
 

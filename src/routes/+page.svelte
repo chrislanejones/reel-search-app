@@ -1,14 +1,18 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import SearchBar from '$lib/components/SearchBar.svelte';
+	import GenreFilter from '$lib/components/GenreFilter.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
+	import { page } from '$app/stores';
 
 	export let data;
 </script>
 
 <h1 class="mb-4 text-2xl font-bold">Movie Search</h1>
 
-<SearchBar />
+<div class="mb-4 flex flex-wrap gap-4">
+	<SearchBar />
+	<GenreFilter />
+</div>
 
 {#if $page.status === 'loading'}
 	<p class="mt-6 text-gray-600">Loading results…</p>

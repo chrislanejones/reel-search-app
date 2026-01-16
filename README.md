@@ -35,6 +35,20 @@ Search terms, pagination, and filters are all driven by URL query parameters. Th
 - Back/forward browser navigation
 - Easier debugging and testing
 
+### Component Architecture
+
+**SearchBar Component**
+A reusable search input that syncs bidirectionally with URL query parameters. Includes debounced input (400ms) to reduce API calls while typing, with immediate submission on Enter.
+
+**Pagination Component**
+Handles page navigation with previous/next controls, automatically disabled at boundaries. Updates URL parameters to maintain state across navigation.
+
+**Result Count UI**
+Displays current page, total pages, and result count to give users context about their search results.
+
+**Load / Empty States**
+Clear visual feedback for loading states during data fetches and empty states when no results match the search query.
+
 ## 🛠 Tech Stack
 
 - **SvelteKit**

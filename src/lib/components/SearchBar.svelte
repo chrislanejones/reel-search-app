@@ -7,7 +7,7 @@
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 	const DEBOUNCE_MS = 400;
 
-	// Sync input from URL (but don’t fight user typing)
+	// Sync from URL → input
 	$: {
 		const current = $page.url.searchParams.get('query');
 		if (current !== lastUrlQuery) {
@@ -17,20 +17,22 @@
 	}
 
 	function navigate(value: string) {
-		if (!value.trim()) {
-			goto('/');
-		} else {
-			const params = new URLSearchParams($page.url.searchParams);
-			params.set('query', query);
+		const params = new URLSearchParams($page.url.searchParams);
+
+		if (value.trim()) {
+			params.set('query', value);
+			params.delete('genre'); // ✅ clear genre when searching
 			params.set('page', '1');
-			goto(`/?${params.toString()}`);
+		} else {
+			params.delete('query');
+			params.set('page', '1');
 		}
+
+		goto(`/?${params.toString()}`);
 	}
 
 	function onInput() {
-		if (debounceTimer) {
-			clearTimeout(debounceTimer);
-		}
+		if (debounceTimer) clearTimeout(debounceTimer);
 
 		debounceTimer = setTimeout(() => {
 			navigate(query);
@@ -38,22 +40,27 @@
 	}
 
 	function onSubmit() {
-		if (debounceTimer) {
-			clearTimeout(debounceTimer);
-		}
-
+		if (debounceTimer) clearTimeout(debounceTimer);
 		navigate(query);
 	}
 </script>
 
-<form on:submit|preventDefault={onSubmit} class="flex max-w-xl gap-2">
+<form
+	on:submit|preventDefault={onSubmit}
+	class="flex items-center overflow-hidden rounded-md border border-neutral-700 bg-neutral-800"
+>
 	<input
 		type="search"
-		placeholder="Search movies..."
+		placeholder="Search movies…"
 		bind:value={query}
 		on:input={onInput}
-		class="flex-1 rounded border px-3 py-2"
+		class="w-56 bg-transparent px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-400 focus:outline-none"
 	/>
 
-	<button type="submit" class="rounded bg-black px-4 py-2 text-white"> Search </button>
+	<button
+		type="submit"
+		class="border-l border-neutral-700 bg-neutral-700 px-4 py-2 text-sm font-medium text-neutral-100 hover:bg-neutral-600"
+	>
+		Search
+	</button>
 </form>

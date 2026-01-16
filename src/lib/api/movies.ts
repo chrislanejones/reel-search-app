@@ -14,9 +14,13 @@ export type Movie = {
 	title: string;
 	summary: string;
 	posterUrl: string | null;
-	runtime: number | null;
-	rating: number | null;
-	genres: string[];
+
+	duration?: string;
+	directors?: string[];
+	mainActors?: string[];
+	genres?: string[];
+	datePublished?: string;
+	ratingValue?: number;
 };
 
 export type MoviesResponse = {
@@ -26,19 +30,22 @@ export type MoviesResponse = {
 	totalPages: number;
 };
 
-type ApiGenre = {
-	name: string;
-};
-
 type ApiMovie = {
 	id: string;
 	title: string;
 	summary: string;
 	posterUrl?: string | null;
-	runtime?: number | null;
-	rating?: number;
-	ratingValue?: number;
-	genres?: (ApiGenre | string | null)[];
+
+	// API fields
+	duration?: string;
+	directors?: string[];
+	mainActors?: string[];
+	genres?: string[];
+	datePublished?: string;
+
+	// Ratings
+	rating?: string; // e.g. "PG"
+	ratingValue?: number; // e.g. 8.4
 };
 
 /* ----------------------------------
@@ -108,12 +115,14 @@ function mapMovie(apiMovie: ApiMovie): Movie {
 	return {
 		id: apiMovie.id,
 		title: apiMovie.title,
-		summary: apiMovie.summary,
+		summary: apiMovie.summary ?? '',
 		posterUrl: apiMovie.posterUrl ?? null,
-		runtime: apiMovie.runtime ?? null,
-		rating: apiMovie.ratingValue ?? apiMovie.rating ?? null,
-		genres: (apiMovie.genres ?? [])
-			.map((g) => (typeof g === 'string' ? g : g?.name))
-			.filter(Boolean) as string[]
+
+		duration: apiMovie.duration,
+		directors: apiMovie.directors ?? [],
+		mainActors: apiMovie.mainActors ?? [],
+		genres: apiMovie.genres ?? [],
+		datePublished: apiMovie.datePublished,
+		ratingValue: apiMovie.ratingValue
 	};
 }

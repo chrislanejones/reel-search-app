@@ -1,22 +1,37 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog';
+	import { Star, X } from 'lucide-svelte';
+	import { PUBLIC_MOVIES_API_BASE_URL } from '$env/static/public';
 
 	export let movie: {
+		id: string;
 		title: string;
 		posterUrl: string;
-		summary: string;
-		duration?: string;
-		directors?: string[];
-		mainActors?: string[];
-		genres?: string[];
-		datePublished?: string;
-		rating?: string;
-		ratingValue?: number;
 	};
+
+	let details: any = null;
+	let loading = false;
+
+	const maxStars = 10;
+
+	async function loadDetails() {
+		if (details || loading) return;
+
+		loading = true;
+
+		const tokenRes = await fetch(`${PUBLIC_MOVIES_API_BASE_URL}/auth/token`);
+		const { token } = await tokenRes.json();
+
+		const res = await fetch(`${PUBLIC_MOVIES_API_BASE_URL}/movies/${movie.id}`, {
+			headers: { Authorization: `Bearer ${token}` }
+		});
+
+		details = await res.json();
+		loading = false;
+	}
 </script>
 
-<Dialog.Root>
-	<!-- Trigger: Poster only -->
+<Dialog.Root onOpenChange={(open) => open && loadDetails()}>
 	<Dialog.Trigger asChild>
 		<button class="group focus:outline-none">
 			<img
@@ -27,52 +42,63 @@
 		</button>
 	</Dialog.Trigger>
 
-	<!-- Dialog -->
-	<Dialog.Content class="max-w-3xl">
-		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-			<!-- Left: Poster -->
-			<img src={movie.posterUrl} alt={movie.title} class="w-full rounded-lg object-cover" />
+	<Dialog.Content class="max-w-4xl border border-neutral-700 bg-neutral-900 p-6 text-neutral-100">
+		{#if loading}
+			<p class="text-neutral-400">Loading details…</p>
+		{:else if details}
+			<div class="grid max-h-[80vh] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
+				<img src={details.posterUrl} alt={details.title} class="w-full rounded-lg object-cover" />
 
-			<!-- Right: Info -->
-			<div class="space-y-3">
-				<h2 class="text-xl font-semibold">{movie.title}</h2>
+				<div class="space-y-4">
+					<h2 class="text-2xl font-semibold">{details.title}</h2>
 
-				{#if movie.ratingValue}
-					<p class="text-muted-foreground text-sm">
-						⭐ {movie.ratingValue} / 10
-					</p>
-				{/if}
+					{#if details.ratingValue}
+						<div class="flex items-center gap-1">
+							{#each Array(maxStars) as _, i}
+								<Star
+									size={18}
+									class={i < Math.round(details.ratingValue)
+										? 'fill-yellow-400 text-yellow-400'
+										: 'text-neutral-600'}
+								/>
+							{/each}
+							<span class="ml-2 text-sm text-neutral-400">
+								{details.ratingValue} / 10
+							</span>
+						</div>
+					{/if}
 
-				<p class="text-sm leading-relaxed">{movie.summary}</p>
+					<p class="text-sm text-neutral-300">{details.summary}</p>
 
-				{#if movie.genres}
-					<p class="text-sm">
-						<strong>Genres:</strong>
-						{movie.genres.join(', ')}
-					</p>
-				{/if}
+					{#if details.genres?.length}
+						<p class="text-sm">
+							<span class="font-medium">Genres:</span>
+							{details.genres.join(', ')}
+						</p>
+					{/if}
 
-				{#if movie.directors}
-					<p class="text-sm">
-						<strong>Director:</strong>
-						{movie.directors.join(', ')}
-					</p>
-				{/if}
+					{#if details.directors?.length}
+						<p class="text-sm">
+							<span class="font-medium">Director:</span>
+							{details.directors.join(', ')}
+						</p>
+					{/if}
 
-				{#if movie.mainActors}
-					<p class="text-sm">
-						<strong>Starring:</strong>
-						{movie.mainActors.join(', ')}
-					</p>
-				{/if}
+					{#if details.mainActors?.length}
+						<p class="text-sm">
+							<span class="font-medium">Starring:</span>
+							{details.mainActors.join(', ')}
+						</p>
+					{/if}
 
-				{#if movie.datePublished}
-					<p class="text-sm">
-						<strong>Released:</strong>
-						{movie.datePublished}
-					</p>
-				{/if}
+					{#if details.duration}
+						<p class="text-sm">
+							<span class="font-medium">Runtime:</span>
+							{details.duration.replace('PT', '').replace('H', 'h ').replace('M', 'm')}
+						</p>
+					{/if}
+				</div>
 			</div>
-		</div>
+		{/if}
 	</Dialog.Content>
 </Dialog.Root>

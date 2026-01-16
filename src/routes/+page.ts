@@ -8,7 +8,8 @@ export const load: PageLoad = async ({ fetch, url }) => {
 	const page = Number(url.searchParams.get('page') ?? 1);
 	const genre = url.searchParams.get('genre') || undefined;
 
-	if (!query) {
+	// Allow browsing by genre OR search
+	if (!query && !genre) {
 		return {
 			results: [],
 			total: 0,
@@ -17,5 +18,9 @@ export const load: PageLoad = async ({ fetch, url }) => {
 		};
 	}
 
-	return fetchMovies(fetch, { query, page, genre });
+	return fetchMovies(fetch, {
+		query: query ?? '',
+		page,
+		genre
+	});
 };

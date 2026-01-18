@@ -3,6 +3,8 @@
 	import MovieDetails from '$lib/components/MovieDetails.svelte';
 	import { PUBLIC_MOVIES_API_BASE_URL } from '$env/static/public';
 
+	const FALLBACK_POSTER = '/Missing-Movie-Poster.jpg';
+
 	const { movie } = $props<{
 		movie: {
 			id: string;
@@ -11,20 +13,21 @@
 		};
 	}>();
 
+	const posterSrc = $derived(movie.posterUrl || FALLBACK_POSTER);
+
 	let details = $state<any>(null);
 	let loading = $state(false);
-
 	let hovered = $state(false);
 	let tiltX = $state(0);
 	let tiltY = $state(0);
 
 	const transformStyle = $derived(
-		`perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${hovered ? 1.03 : 1})`
+		`perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) 
+		scale(${hovered ? 1.03 : 1})`
 	);
 
 	async function loadDetails() {
 		if (details || loading) return;
-
 		loading = true;
 
 		const tokenRes = await fetch(`${PUBLIC_MOVIES_API_BASE_URL}/auth/token`);
@@ -57,6 +60,13 @@
 		tiltX = 0;
 		tiltY = 0;
 	}
+
+	function handleImageError(e: Event) {
+		const img = e.currentTarget as HTMLImageElement;
+		if (img.src !== FALLBACK_POSTER) {
+			img.src = FALLBACK_POSTER;
+		}
+	}
 </script>
 
 <Dialog.Root onOpenChange={(open) => open && loadDetails()}>
@@ -72,17 +82,15 @@
 				onmouseleave={onMouseLeave}
 			>
 				<div
-					class="relative transition-transform duration-200 ease-out will-change-transform"
+					class="relative transition-transform duration-200 ease-out
+					will-change-transform"
 					style={`transform: ${transformStyle}`}
 				>
 					<img
-						src={movie.posterUrl}
+						src={posterSrc}
 						alt={movie.title}
 						class="aspect-2/3 w-full rounded-lg object-cover"
-						onerror={(e) => {
-							const img = e.currentTarget as HTMLImageElement;
-							img.src = '/Missing-Movie-Poster.jpg';
-						}}
+						onerror={handleImageError}
 					/>
 
 					{#if hovered}
@@ -96,25 +104,29 @@
 		{/snippet}
 	</Dialog.Trigger>
 
-	<Dialog.Content class="max-w-4xl border border-neutral-700 bg-neutral-900 p-6 text-neutral-100">
+	<Dialog.Content
+		class="max-w-4xl border border-neutral-700 bg-neutral-900 p-6 
+		text-neutral-100"
+	>
 		{#if loading}
 			<div class="flex h-48 items-center justify-center">
 				<div
-					class="h-10 w-10 animate-spin rounded-full border-4 border-neutral-700 border-t-yellow-400"
+					class="h-10 w-10 animate-spin rounded-full border-4
+					border-neutral-700 border-t-yellow-400"
 					role="status"
 					aria-label="Loading"
 				></div>
 			</div>
 		{:else if details}
-			<div class="grid max-h-[80vh] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
+			<div
+				class="grid max-h-[80vh] grid-cols-1 gap-6 overflow-y-auto
+				md:grid-cols-2"
+			>
 				<img
-					src={details.posterUrl}
-					alt={details.title}
-					class="w-full rounded-lg object-cover"
-					onerror={(e) => {
-						const img = e.currentTarget as HTMLImageElement;
-						img.src = '/Missing-Movie-Poster.jpg';
-					}}
+					src={posterSrc}
+					alt={movie.title}
+					class="aspect-2/3 w-full rounded-lg object-cover"
+					onerror={handleImageError}
 				/>
 
 				<MovieDetails {details} />

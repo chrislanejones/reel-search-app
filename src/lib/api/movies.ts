@@ -111,7 +111,7 @@ export async function fetchMovies(
 /* ----------------------------------
  * Step 4: Normalization
  * ---------------------------------- */
-function mapMovie(apiMovie: ApiMovie): Movie {
+export function mapMovie(apiMovie: ApiMovie): Movie {
 	return {
 		id: apiMovie.id,
 		title: apiMovie.title,

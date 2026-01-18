@@ -3,14 +3,24 @@
 	import MovieDetails from '$lib/components/MovieDetails.svelte';
 	import { PUBLIC_MOVIES_API_BASE_URL } from '$env/static/public';
 
-	export let movie: {
-		id: string;
-		title: string;
-		posterUrl: string;
-	};
+	const { movie } = $props<{
+		movie: {
+			id: string;
+			title: string;
+			posterUrl: string;
+		};
+	}>();
 
-	let details: any = null;
-	let loading = false;
+	let details = $state<any>(null);
+	let loading = $state(false);
+
+	let hovered = $state(false);
+	let tiltX = $state(0);
+	let tiltY = $state(0);
+
+	const transformStyle = $derived(
+		`perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(${hovered ? 1.03 : 1})`
+	);
 
 	async function loadDetails() {
 		if (details || loading) return;
@@ -27,6 +37,26 @@
 		details = await res.json();
 		loading = false;
 	}
+
+	function onMouseMove(e: MouseEvent) {
+		const target = e.currentTarget as HTMLElement;
+		const rect = target.getBoundingClientRect();
+
+		const x = e.clientX - rect.left;
+		const y = e.clientY - rect.top;
+
+		const centerX = rect.width / 2;
+		const centerY = rect.height / 2;
+
+		tiltX = ((y - centerY) / centerY) * -6;
+		tiltY = ((x - centerX) / centerX) * 6;
+	}
+
+	function onMouseLeave() {
+		hovered = false;
+		tiltX = 0;
+		tiltY = 0;
+	}
 </script>
 
 <Dialog.Root onOpenChange={(open) => open && loadDetails()}>
@@ -35,14 +65,33 @@
 			<button
 				type="button"
 				{...props}
-				class="group focus:outline-none"
+				class="group relative focus:outline-none"
 				aria-label={`Open details for ${movie.title}`}
+				onmouseenter={() => (hovered = true)}
+				onmousemove={onMouseMove}
+				onmouseleave={onMouseLeave}
 			>
-				<img
-					src={movie.posterUrl}
-					alt={movie.title}
-					class="aspect-2/3 w-full rounded-lg object-cover transition group-hover:opacity-90"
-				/>
+				<div
+					class="relative transition-transform duration-200 ease-out will-change-transform"
+					style={`transform: ${transformStyle}`}
+				>
+					<img
+						src={movie.posterUrl}
+						alt={movie.title}
+						class="aspect-2/3 w-full rounded-lg object-cover"
+						onerror={(e) => {
+							const img = e.currentTarget as HTMLImageElement;
+							img.src = '/Missing-Movie-Poster.jpg';
+						}}
+					/>
+
+					{#if hovered}
+						<div
+							class="pointer-events-none absolute inset-0 rounded-lg"
+							style="box-shadow: 0 0 32px rgba(234, 179, 8, 0.35)"
+						></div>
+					{/if}
+				</div>
 			</button>
 		{/snippet}
 	</Dialog.Trigger>
@@ -52,13 +101,21 @@
 			<div class="flex h-48 items-center justify-center">
 				<div
 					class="h-10 w-10 animate-spin rounded-full border-4 border-neutral-700 border-t-yellow-400"
-					aria-label="Loading"
 					role="status"
-				/>
+					aria-label="Loading"
+				></div>
 			</div>
 		{:else if details}
 			<div class="grid max-h-[80vh] grid-cols-1 gap-6 overflow-y-auto md:grid-cols-2">
-				<img src={details.posterUrl} alt={details.title} class="w-full rounded-lg object-cover" />
+				<img
+					src={details.posterUrl}
+					alt={details.title}
+					class="w-full rounded-lg object-cover"
+					onerror={(e) => {
+						const img = e.currentTarget as HTMLImageElement;
+						img.src = '/Missing-Movie-Poster.jpg';
+					}}
+				/>
 
 				<MovieDetails {details} />
 			</div>

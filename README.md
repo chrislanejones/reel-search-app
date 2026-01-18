@@ -1,91 +1,136 @@
-# Movies Explorer
+# Reel Search App
 
-A movie search application built with **SvelteKit** that allows users to search, filter, and browse movies using a public REST API.
+A movie discovery application built with SvelteKit that allows users to search for movies, browse by genre, and view detailed information in a clean, responsive interface.
 
-The app supports paginated results, genre filtering, and displays key movie details such as title, summary, rating, runtime, and poster.
+The app focuses on URL-driven state, clear UX, and real-world API handling, rather than visual over-engineering.
 
-## ✨ Features
+---
 
-- Search movies by title
-- Filter results by genre
-- Paginated results with next/previous navigation
-- Total result count display
-- Clear empty and loading states
-- URL-driven state (search, page, genre)
+## Features
 
-## 🥱 Technical Highlights
+- **Search movies by title**
+  - Debounced input to reduce API calls while typing
+  - Immediate submission on Enter
 
-### API Client Normalization
+- **Browse movies by genre**
+  - Genre selection works even without a search query
+  - Selecting a genre clears the search to avoid conflicting filters
 
-One of the most significant aspects of this project is the API client layer.
+- **URL-driven state**
+  - Search, genre, and pagination are synced to query parameters
+  - Shareable URLs and browser back/forward support
 
-Although the REST API documentation suggested a certain response structure, the actual API returned a different shape. To keep the UI stable and predictable, I implemented a normalization layer in the API client that adapts the backend response into a consistent, UI‑focused model.
+- **Pagination**
+  - Previous / Next controls
+  - Disabled at boundaries
 
-One benefit of this approach is that it keeps components simple and isolates backend inconsistencies to a single place.
+- **Poster grid layout**
+  - Responsive grid from mobile to desktop
 
-### Auth-Aware Data Fetching
+- **Movie detail dialog**
+  - Opens on poster click
+  - Loads full movie details on demand
+  - Star rating with filled and dimmed stars
 
-The Movies API requires authenticated requests using a short‑lived token. The application fetches a token on demand and includes it in all movie requests, ensuring compatibility with the API while keeping the authentication logic encapsulated in the data layer.
+- **Dark mode UI**
+  - Clean, minimal, high-contrast design
 
-### URL-Based State Management
+- **Graceful error handling**
+  - Friendly error message with retry option
 
-Search terms, pagination, and filters are all driven by URL query parameters. This allows:
+- **Responsive layout**
+  - Works cleanly across screen sizes
 
-- Shareable URLs
-- Back/forward browser navigation
-- Easier debugging and testing
+---
+
+## Technical Highlights
+
+### URL-Driven State
+
+All application state lives in the URL:
+
+- `query` - search term
+- `genre` - selected genre
+- `page` - pagination
+
+This ensures:
+
+- State survives refreshes
+- Links are shareable
+- Back/forward navigation works naturally
+
+### API Client & Normalization
+
+All API communication is centralized in a small client module that:
+
+- Fetches authentication tokens as needed
+- Constructs API requests
+- Normalizes responses into a UI-friendly shape
+
+This isolates backend quirks and keeps components simple.
+
+### Lazy-Loaded Movie Details
+
+The movie list endpoint returns partial data only.
+
+Full details are fetched only when a movie dialog is opened, improving performance and aligning with real-world API usage.
 
 ### Component Architecture
 
-**SearchBar Component**
-A reusable search input that syncs bidirectionally with URL query parameters. Includes debounced input (400ms) to reduce API calls while typing, with immediate submission on Enter.
+- **SearchBar** - debounced search input with URL sync
+- **GenreFilter** - URL-driven genre browsing using shadcn-svelte Select
+- **Pagination** - page navigation via URL updates
+- **MovieCard** - poster card with dialog-based details
 
-**Pagination Component**
-Handles page navigation with previous/next controls, automatically disabled at boundaries. Updates URL parameters to maintain state across navigation.
+Each component has a single responsibility and no direct API logic.
 
-**Result Count UI**
-Displays current page, total pages, and result count to give users context about their search results.
+---
 
-**Load / Empty States**
-Clear visual feedback for loading states during data fetches and empty states when no results match the search query.
+## Tech Stack
 
-## 🛠 Tech Stack
-
-- **SvelteKit**
-- **TypeScript**
-- **Tailwind CSS**
-- Native Fetch API
+- SvelteKit
+- TypeScript
+- Tailwind CSS
+- shadcn-svelte / bits-ui
+- Lucide icons
 - Vite
 
-## 🚀 Running Locally
+---
+
+## Running Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open:
+Then open: http://localhost:5173
 
-```
+---
 
-http://localhost:5173
+## What I'm Most Proud Of
 
-```
+I'm most proud of how the app handles real-world API behavior:
 
+- Incomplete list payloads
+- Auth-required requests
+- Response shape mismatches
+- Conditional fetching for performance
 
-## ✅ What I'm Most Proud Of
+The final solution is resilient, predictable, and easy to reason about.
 
-I'm most proud of how the API integration was handled. The final implementation reflects real‑world conditions: undocumented API behavior, authentication requirements, and SSR considerations. The resulting data layer is resilient, testable, and easy to reason about.
+---
 
+## What I'd Add With More Time
 
-### 🔧 What I'd Add With More Time
-
-- Accessibility improvements (keyboard navigation, ARIA labels)
+- Accessibility improvements (ARIA labels, keyboard focus polish)
+- Dynamic genre loading from the API
 - Unit tests for the API client
-- Improved pagination controls (jump to page)
-- Movie detail view using /movies/{id}
+- Page number pagination
+- Dedicated movie detail route (`/movies/{id}`)
 
+---
 
-## 📄 Notes
+## Notes
 
-This project was built as a take‑home exercise and focuses on clean architecture and functionality rather than visual design polish.
+This project was built as a take-home exercise. The focus was on architecture, state management, and UX clarity, not visual excess.

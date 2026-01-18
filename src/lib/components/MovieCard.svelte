@@ -20,6 +20,7 @@
 	let hovered = $state(false);
 	let tiltX = $state(0);
 	let tiltY = $state(0);
+	let posterMissing = $state(posterSrc === FALLBACK_POSTER);
 
 	const transformStyle = $derived(
 		`perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) 
@@ -63,8 +64,10 @@
 
 	function handleImageError(e: Event) {
 		const img = e.currentTarget as HTMLImageElement;
+
 		if (img.src !== FALLBACK_POSTER) {
 			img.src = FALLBACK_POSTER;
+			posterMissing = true;
 		}
 	}
 </script>
@@ -98,6 +101,17 @@
 							class="pointer-events-none absolute inset-0 rounded-lg"
 							style="box-shadow: 0 0 32px rgba(234, 179, 8, 0.35)"
 						></div>
+					{/if}
+
+					{#if posterMissing}
+						<div
+							class="absolute right-0 bottom-0 left-0 rounded-b-lg
+							bg-gradient-to-t from-black to-transparent p-3"
+						>
+							<p class="line-clamp-2 text-sm font-semibold text-white">
+								{movie.title}
+							</p>
+						</div>
 					{/if}
 				</div>
 			</button>

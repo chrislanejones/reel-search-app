@@ -3,8 +3,10 @@
 	import { page } from '$app/state';
 	import * as Pagination from '$lib/components/ui/pagination';
 
-	export let currentPage: number;
-	export let totalPages: number;
+	const { currentPage, totalPages } = $props<{
+		currentPage: number;
+		totalPages: number;
+	}>();
 
 	function goTo(pageNumber: number) {
 		if (pageNumber < 1 || pageNumber > totalPages) return;

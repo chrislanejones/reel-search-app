@@ -1,15 +1,19 @@
 <script lang="ts">
+	import { goto, beforeNavigate, afterNavigate } from '$app/navigation';
 	import * as Dialog from '$lib/components/ui/dialog';
+	import { Play } from 'lucide-svelte';
+	import { Button } from '$lib/components/ui/button';
 	import MovieDetails from '$lib/components/MovieDetails.svelte';
 	import { PUBLIC_MOVIES_API_BASE_URL } from '$env/static/public';
 
 	const FALLBACK_POSTER = '/Missing-Movie-Poster.jpg';
+	const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w342';
 
 	const { movie } = $props<{
 		movie: {
 			id: string;
 			title: string;
-			posterUrl?: string | null;
+			posterUrl: string | null;
 		};
 	}>();
 
@@ -20,12 +24,21 @@
 	let hovered = $state(false);
 	let tiltX = $state(0);
 	let tiltY = $state(0);
-	const posterMissing = $derived(posterSrc === FALLBACK_POSTER);
+	let posterMissing = $state(false);
+	let isNavigating = $state(false);
 
 	const transformStyle = $derived(
 		`perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) 
 		scale(${hovered ? 1.03 : 1})`
 	);
+
+	beforeNavigate(() => {
+		isNavigating = true;
+	});
+
+	afterNavigate(() => {
+		isNavigating = false;
+	});
 
 	async function loadDetails() {
 		if (details || loading) return;
@@ -62,12 +75,52 @@
 		tiltY = 0;
 	}
 
-	function handleImageError(e: Event) {
+	async function handleImageError(e: Event) {
 		const img = e.currentTarget as HTMLImageElement;
+
+		if (img.src === posterSrc && posterSrc !== FALLBACK_POSTER) {
+			try {
+				const res = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/images`, {
+					headers: { accept: 'application/json' }
+				});
+				const data = await res.json();
+
+				if (data.posters?.length > 0) {
+					const bestPoster = data.posters.reduce((best: any, current: any) =>
+						current.vote_average > best.vote_average ? current : best
+					);
+					img.src = `${TMDB_IMAGE_BASE}${bestPoster.file_path}`;
+					posterMissing = false;
+					return;
+				}
+
+				if (data.backdrops?.length > 0) {
+					const bestBackdrop = data.backdrops.reduce((best: any, current: any) =>
+						current.vote_average > best.vote_average ? current : best
+					);
+					img.src = `${TMDB_IMAGE_BASE}${bestBackdrop.file_path}`;
+					posterMissing = false;
+					return;
+				}
+
+				if (data.logos?.length > 0) {
+					img.src = `${TMDB_IMAGE_BASE}${data.logos[0].file_path}`;
+					posterMissing = false;
+					return;
+				}
+			} catch {
+				// Fall through to FALLBACK_POSTER
+			}
+		}
 
 		if (img.src !== FALLBACK_POSTER) {
 			img.src = FALLBACK_POSTER;
+			posterMissing = true;
 		}
+	}
+
+	function handlePlayMovie() {
+		goto('/play');
 	}
 </script>
 
@@ -118,7 +171,7 @@
 	</Dialog.Trigger>
 
 	<Dialog.Content
-		class="max-w-4xl border border-neutral-700 bg-neutral-900 p-6 
+		class="max-w-4xl border border-neutral-700 bg-neutral-900 p-6
 		text-neutral-100"
 	>
 		{#if loading}
@@ -142,7 +195,19 @@
 					onerror={handleImageError}
 				/>
 
-				<MovieDetails {details} />
+				<div class="flex flex-col gap-4">
+					<MovieDetails {details} />
+
+					<Button
+						onclick={handlePlayMovie}
+						disabled={isNavigating}
+						class="mt-4 flex items-center gap-2 bg-yellow-500 font-semibold
+						text-black hover:bg-yellow-600 disabled:opacity-50"
+					>
+						<Play class="h-5 w-5" />
+						{isNavigating ? 'Playing...' : 'Play Movie'}
+					</Button>
+				</div>
 			</div>
 		{/if}
 	</Dialog.Content>

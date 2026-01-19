@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Star } from 'lucide-svelte';
 
-	export let details: {
+	interface MovieDetails {
 		title: string;
 		summary: string;
 		duration?: string;
@@ -10,7 +10,9 @@
 		genres?: string[];
 		datePublished?: string;
 		ratingValue?: number;
-	};
+	}
+
+	const { details } = $props<{ details: MovieDetails }>();
 
 	const maxStars = 10;
 </script>

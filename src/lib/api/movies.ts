@@ -30,6 +30,11 @@ export type MoviesResponse = {
 	totalPages: number;
 };
 
+type ApiGenre = {
+	id: string;
+	title: string;
+};
+
 type ApiMovie = {
 	id: string;
 	title: string;
@@ -40,7 +45,7 @@ type ApiMovie = {
 	duration?: string;
 	directors?: string[];
 	mainActors?: string[];
-	genres?: string[];
+	genres?: ApiGenre[];
 	datePublished?: string;
 
 	// Ratings
@@ -121,7 +126,7 @@ export function mapMovie(apiMovie: ApiMovie): Movie {
 		duration: apiMovie.duration,
 		directors: apiMovie.directors ?? [],
 		mainActors: apiMovie.mainActors ?? [],
-		genres: apiMovie.genres ?? [],
+		genres: (apiMovie.genres ?? []).map((g) => g.title),
 		datePublished: apiMovie.datePublished,
 		ratingValue: apiMovie.ratingValue
 	};

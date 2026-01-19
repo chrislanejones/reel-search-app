@@ -1,13 +1,17 @@
 <script lang="ts">
 	import { Star } from 'lucide-svelte';
 
+	interface Genre {
+		name: string;
+	}
+
 	interface MovieDetails {
 		title: string;
 		summary: string;
 		duration?: string;
 		directors?: string[];
 		mainActors?: string[];
-		genres?: string[];
+		genres?: (string | Genre)[];
 		datePublished?: string;
 		ratingValue?: number;
 	}
@@ -23,20 +27,27 @@
 	</h2>
 
 	{#if details.ratingValue !== undefined}
+	<div class="flex flex-col gap-1">
+		<!-- Stars -->
 		<div class="flex items-center gap-1">
 			{#each Array(maxStars) as _, i}
 				<Star
 					size={18}
-					class={i < Math.round(details.ratingValue)
-						? 'fill-yellow-400 text-yellow-400'
-						: 'text-neutral-600'}
+					class={
+						i < Math.round(details.ratingValue)
+							? 'fill-yellow-400 text-yellow-400'
+							: 'text-neutral-600'
+					}
 				/>
 			{/each}
-			<span class="ml-2 text-sm text-neutral-400">
-				{details.ratingValue} / 10
-			</span>
 		</div>
-	{/if}
+
+		<!-- Numeric rating -->
+		<span class="text-sm text-neutral-400">
+			{details.ratingValue} / 10
+		</span>
+	</div>
+{/if}
 
 	{#if details.datePublished}
 		<p class="text-sm text-neutral-400">
@@ -51,7 +62,9 @@
 	{#if details.genres?.length}
 		<p class="text-sm text-neutral-300">
 			<span class="font-medium text-neutral-100">Genres:</span>
-			{details.genres.join(', ')}
+			{details.genres
+				.map((g: string | Genre) => (typeof g === 'string' ? g : g.name))
+				.join(', ')}
 		</p>
 	{/if}
 
@@ -72,7 +85,10 @@
 	{#if details.duration}
 		<p class="text-sm text-neutral-300">
 			<span class="font-medium text-neutral-100">Runtime:</span>
-			{details.duration.replace('PT', '').replace('H', 'h ').replace('M', 'm')}
+			{details.duration
+				.replace('PT', '')
+				.replace('H', 'h ')
+				.replace('M', 'm')}
 		</p>
 	{/if}
 </div>

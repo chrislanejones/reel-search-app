@@ -5,6 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { goto, beforeNavigate, afterNavigate } from '$app/navigation';
 	import { PUBLIC_MOVIES_API_BASE_URL } from '$env/static/public';
+	import { mapMovie, type Movie } from '$lib/api/movies';
 
 	const FALLBACK_POSTER = '/Missing-Movie-Poster.jpg';
 
@@ -25,7 +26,7 @@
 		posterSrc === FALLBACK_POSTER || posterErrored
 	);
 
-	let details = $state<any>(null);
+	let details = $state<Movie | null>(null);
 	let loading = $state(false);
 	let isNavigating = $state(false);
 
@@ -59,7 +60,7 @@
 			{ headers: { Authorization: `Bearer ${token}` } }
 		);
 
-		details = await res.json();
+		details = mapMovie(await res.json());
 		loading = false;
 	}
 

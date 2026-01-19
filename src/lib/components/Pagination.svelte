@@ -1,38 +1,52 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import * as Pagination from '$lib/components/ui/pagination';
 
 	export let currentPage: number;
 	export let totalPages: number;
 
 	function goTo(pageNumber: number) {
-		const params = new URLSearchParams($page.url.searchParams);
-		params.set('page', String(pageNumber));
+		if (pageNumber < 1 || pageNumber > totalPages) return;
 
+		const params = new URLSearchParams(page.url.searchParams);
+		params.set('page', String(pageNumber));
 		goto(`/?${params.toString()}`);
 	}
 </script>
 
 {#if totalPages > 1}
-	<nav class="mt-6 flex items-center gap-2">
-		<button
-			on:click={() => goTo(currentPage - 1)}
-			disabled={currentPage === 1}
-			class="rounded border px-3 py-1 disabled:opacity-50"
-		>
-			Prev
-		</button>
+	<Pagination.Root
+		count={totalPages}
+		perPage={1}
+		page={currentPage}
+		onPageChange={(page) => goTo(page)}
+		class="mt-6 flex justify-center"
+	>
+		<Pagination.Content>
+			<Pagination.Item>
+				<Pagination.Previous
+					onclick={() => goTo(currentPage - 1)}
+					class="bg-neutral-800 text-neutral-100 hover:bg-neutral-700
+					dark:bg-neutral-800 dark:text-neutral-100
+					dark:hover:bg-neutral-700"
+				/>
+			</Pagination.Item>
 
-		<span class="text-sm text-gray-600">
-			Page {currentPage} of {totalPages}
-		</span>
+			<Pagination.Item>
+				<span class="px-3 text-sm text-neutral-400">
+					Page {currentPage} of {totalPages}
+				</span>
+			</Pagination.Item>
 
-		<button
-			on:click={() => goTo(currentPage + 1)}
-			disabled={currentPage === totalPages}
-			class="rounded border px-3 py-1 disabled:opacity-50"
-		>
-			Next
-		</button>
-	</nav>
+			<Pagination.Item>
+				<Pagination.Next
+					onclick={() => goTo(currentPage + 1)}
+					class="bg-neutral-800 text-neutral-100 hover:bg-neutral-700
+					dark:bg-neutral-800 dark:text-neutral-100
+					dark:hover:bg-neutral-700"
+				/>
+			</Pagination.Item>
+		</Pagination.Content>
+	</Pagination.Root>
 {/if}

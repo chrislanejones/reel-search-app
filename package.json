@@ -46,6 +46,7 @@
 		"vitest": "^4.0.17"
 	},
 	"dependencies": {
+		"@radix-ui/react-slot": "^1.2.4",
 		"lucide-svelte": "^0.562.0"
 	}
 }

@@ -9,7 +9,7 @@
 		movie: {
 			id: string;
 			title: string;
-			posterUrl: string;
+			posterUrl?: string | null;
 		};
 	}>();
 
@@ -20,7 +20,7 @@
 	let hovered = $state(false);
 	let tiltX = $state(0);
 	let tiltY = $state(0);
-	let posterMissing = $state(posterSrc === FALLBACK_POSTER);
+	const posterMissing = $derived(posterSrc === FALLBACK_POSTER);
 
 	const transformStyle = $derived(
 		`perspective(800px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) 
@@ -67,7 +67,6 @@
 
 		if (img.src !== FALLBACK_POSTER) {
 			img.src = FALLBACK_POSTER;
-			posterMissing = true;
 		}
 	}
 </script>
@@ -106,7 +105,7 @@
 					{#if posterMissing}
 						<div
 							class="absolute right-0 bottom-0 left-0 rounded-b-lg
-							bg-gradient-to-t from-black to-transparent p-3"
+							bg-linear-to-t from-black to-transparent p-3"
 						>
 							<p class="line-clamp-2 text-sm font-semibold text-white">
 								{movie.title}

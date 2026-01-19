@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import * as Select from '$lib/components/ui/select';
 
 	const genres = [
@@ -24,21 +24,21 @@
 		'Western'
 	];
 
-	let value: string = '';
+	let value = $state<string>('');
 
-	// Sync from URL
-	$: {
-		value = $page.url.searchParams.get('genre') ?? '';
-	}
+	$effect(() => {
+		const genre = page.url.searchParams.get('genre');
+		value = genre || '';
+	});
 
-	function onChange(newValue: string | string[] | null) {
-		const genre = Array.isArray(newValue) ? newValue[newValue.length - 1] : newValue;
+	function onChange(newValue: string | null) {
+		const genre = newValue || '';
 
-		const params = new URLSearchParams($page.url.searchParams);
+		const params = new URLSearchParams(page.url.searchParams);
 
 		if (genre) {
 			params.set('genre', genre);
-			params.delete('query'); // ✅ clear search when browsing by genre
+			params.delete('query');
 			params.set('page', '1');
 		} else {
 			params.delete('genre');
@@ -49,9 +49,10 @@
 	}
 </script>
 
-<Select.Root {value} onValueChange={onChange}>
+<Select.Root {value} onValueChange={onChange} type="single">
 	<Select.Trigger
-		class="h-9 w-48 rounded-md border border-neutral-700 bg-neutral-800 px-3 text-sm text-neutral-100"
+		class="h-9 w-48 rounded-md border border-neutral-700 bg-neutral-800 px-3 
+		text-sm text-neutral-100"
 	>
 		{#if value}
 			{value}

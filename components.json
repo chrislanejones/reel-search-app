@@ -1,8 +1,13 @@
 {
-	"$schema": "https://shadcn-svelte.com/schema.json",
+	"$schema": "https://ui.shadcn.com/schema.json",
+	"style": "default",
+	"rsc": false,
+	"tsx": false,
 	"tailwind": {
+		"config": "",
 		"css": "src/routes/layout.css",
-		"baseColor": "slate"
+		"baseColor": "slate",
+		"cssVariables": true
 	},
 	"aliases": {
 		"components": "$lib/components",
@@ -10,7 +15,5 @@
 		"ui": "$lib/components/ui",
 		"hooks": "$lib/hooks",
 		"lib": "$lib"
-	},
-	"typescript": true,
-	"registry": "https://shadcn-svelte.com/registry"
+	}
 }

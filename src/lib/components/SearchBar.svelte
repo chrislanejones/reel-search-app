@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	let query = '';
 	let lastUrlQuery: string | null = null;
@@ -9,7 +9,7 @@
 
 	// Sync from URL → input
 	$: {
-		const current = $page.url.searchParams.get('query');
+		const current = page.url.searchParams.get('query');
 		if (current !== lastUrlQuery) {
 			lastUrlQuery = current;
 			query = current ?? '';
@@ -17,7 +17,7 @@
 	}
 
 	function navigate(value: string) {
-		const params = new URLSearchParams($page.url.searchParams);
+		const params = new URLSearchParams(page.url.searchParams);
 
 		if (value.trim()) {
 			params.set('query', value);
